@@ -4,7 +4,6 @@ from flask_pymongo import PyMongo
 from functools import wraps
 import datetime
 import json
-from bson.objectid import ObjectId
 
 app = Flask(__name__)
 app.secret_key = "yb-blog"
@@ -67,45 +66,13 @@ def addarticle():
     return render_template("addarticle.html")
 
 
-@app.route('/article/<string:id>')
-def article(id):
-    myquery = {"_id": ObjectId(id)}
-    makaleler = db_makale.find(myquery)
-    output = [
-        {
-            '_id': makale['_id'],
-            'baslik': makale['baslik'],
-            'icerik': makale['icerik'],
-            'time':makale['time'],
-            'yazar':makale['yazar'],
-            'kategori':makale['kategori']
-        } for makale in makaleler]
-    return render_template("article.html", output=output)
 
 
-@app.route('/makaleguncelle/<string:id>')
-@login_required
-def makaleguncelle(id):
-    myquery = {"_id": ObjectId(id)}
-    makaleler = db_makale.find(myquery)
-    output = [
-        {
-            '_id': makale['_id'],
-            'baslik': makale['baslik'],
-            'icerik': makale['icerik'],
-            'time':makale['time'],
-            'yazar':makale['yazar'],
-            'kategori':makale['kategori']
-        } for makale in makaleler]
-    return render_template("makaleguncelle.html", output=output)
 
 
-@app.route('/delete/<string:id>')
-@login_required
-def delete(id):
-    myquery = {"_id": ObjectId(id)}
-    db_makale.delete_one(myquery)
-    return redirect(url_for('dashboard'))
+
+
+
 
 
 @ app.route('/register', methods=['GET', 'POST'])
@@ -166,29 +133,6 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-
-@app.route('/search', methods=['GET', 'POST'])
-def search():
-    if request.method == 'POST':
-        data = request.form['search']
-        print(data.upper())
-        print(data.lower())
-        myquery = {"baslik": {"$regex": '^'+data.lower()}}
-        myquery2 = {"baslik": {"$regex": '^'+data.upper()}}
-        makaleler = db_makale.find(myquery)
-        makaleler1 = db_makale.find(myquery2)
-        output = [
-            {
-                '_id': makale['_id'],
-            } for makale in makaleler]
-        output1 = [
-            {
-                '_id': makale['_id'],
-            } for makale in makaleler1]
-        print(output)
-        print(output1)
-        return redirect(url_for('index'))
-    return redirect(url_for('index'))
 
 
 @app.route('/', methods=['GET', 'POST'])
